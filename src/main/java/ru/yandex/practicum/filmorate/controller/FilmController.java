@@ -24,7 +24,7 @@ public class FilmController {
     private static int id = 1;
 
     private final Map<Integer, Film> films = new HashMap<>();
-    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
+    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
     @GetMapping
     public Collection<Film> getFilms() {
