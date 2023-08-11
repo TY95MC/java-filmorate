@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exceptions.UserValidationException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
@@ -24,53 +24,52 @@ import java.util.Map;
 public class UserController {
     private static int id = 1;
 
-    private final Map<Integer, User> users = new HashMap<>();
+    private final Map<Integer, User> idToUsers = new HashMap<>();
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping
     public Collection<User> getUsers() {
-        log.info("Количество пользователей в текущий момент: {}", users.size());
-        return Collections.unmodifiableCollection(users.values());
+        log.info("Количество пользователей в текущий момент: {}", idToUsers.size());
+        return Collections.unmodifiableCollection(idToUsers.values());
     }
 
     @PostMapping()
     public User create(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
+        if (idToUsers.containsKey(user.getId())) {
             log.info("Попытка зарегистрировать уже существующего пользователя {}", user.toString());
-            throw new UserValidationException("Пользователь с электронной почтой " +
+            throw new ValidationException("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
         }
 
         if (!isValidUser(user)) {
             log.info("Попытка добавить некорректного пользователя {}", user.toString());
-            throw new UserValidationException("Данные пользователя некорректно заполнены!");
+            throw new ValidationException("Данные пользователя некорректно заполнены!");
         } else {
             user.setId(generateId());
             log.info("Сохраняется пользователь: {}", user.toString());
-            users.put(user.getId(), user);
+            idToUsers.put(user.getId(), user);
             return user;
         }
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
+        if (!idToUsers.containsKey(user.getId())) {
             log.info("Попытка обновить несуществующего пользователя {}", user.toString());
-            throw new UserValidationException("Данные пользователя некорректно заполнены!");
+            throw new ValidationException("Данные пользователя некорректно заполнены!");
         }
 
         if (!isValidUser(user)) {
             log.info("Попытка обновить некорректного пользователя {}", user.toString());
-            throw new UserValidationException("Данные пользователя некорректно заполнены!");
+            throw new ValidationException("Данные пользователя некорректно заполнены!");
         }
 
         log.info("Обновление данных пользователя {}", user.toString());
-        users.put(user.getId(), user);
+        idToUsers.put(user.getId(), user);
         return user;
     }
 
     private boolean isValidUser(User user) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\\\.)+[a-zA-Z]{2,7}$";
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
