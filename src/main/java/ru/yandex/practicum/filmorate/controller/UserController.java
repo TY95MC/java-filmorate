@@ -12,11 +12,8 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -28,9 +25,9 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         log.info("Количество пользователей в текущий момент: {}", idToUsers.size());
-        return Collections.unmodifiableCollection(idToUsers.values());
+        return List.copyOf(idToUsers.values());
     }
 
     @PostMapping()
@@ -41,15 +38,10 @@ public class UserController {
                     user.getEmail() + " уже зарегистрирован.");
         }
 
-        if (!isValidUser(user)) {
-            log.info("Попытка добавить некорректного пользователя {}", user.toString());
-            throw new ValidationException("Данные пользователя некорректно заполнены!");
-        } else {
-            user.setId(generateId());
-            log.info("Сохраняется пользователь: {}", user.toString());
-            idToUsers.put(user.getId(), user);
-            return user;
-        }
+        user.setId(generateId());
+        log.info("Сохраняется пользователь: {}", user.toString());
+        idToUsers.put(user.getId(), user);
+        return user;
     }
 
     @PutMapping
@@ -59,24 +51,9 @@ public class UserController {
             throw new ValidationException("Данные пользователя некорректно заполнены!");
         }
 
-        if (!isValidUser(user)) {
-            log.info("Попытка обновить некорректного пользователя {}", user.toString());
-            throw new ValidationException("Данные пользователя некорректно заполнены!");
-        }
-
         log.info("Обновление данных пользователя {}", user.toString());
         idToUsers.put(user.getId(), user);
         return user;
-    }
-
-    private boolean isValidUser(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        return user.getEmail().contains("@")
-                && !user.getEmail().isBlank()
-                && !user.getLogin().isBlank()
-                && user.getBirthday().isBefore(LocalDate.now().minus(Period.ofYears(14)));
     }
 
     private int generateId() {

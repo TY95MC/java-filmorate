@@ -79,12 +79,10 @@ public class FilmControllerTest {
                 .hasMessageContaining("Данные фильма некорректно заполнены!");
 
         //фильм с неправильной датой выпуска
-        Assertions.assertThatThrownBy(
-                        () -> mockMvc.perform(put("/films")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{\"name\": \"FilmName\", \"description\": \"Film description\"," +
-                                        " \"releaseDate\": \"1890-03-25\", \"duration\": 100}")))
-                .hasCauseInstanceOf(ValidationException.class)
-                .hasMessageContaining("Данные фильма некорректно заполнены!");
+        mockMvc.perform(put("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"FilmName\", \"description\": \"Film description\"," +
+                                " \"releaseDate\": \"1890-03-25\", \"duration\": 100}"))
+                .andExpect(status().is4xxClientError());
     }
 }

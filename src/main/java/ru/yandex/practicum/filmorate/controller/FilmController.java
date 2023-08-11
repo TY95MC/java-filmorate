@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,15 +37,10 @@ public class FilmController {
             throw new ValidationException("Фильм " + film.getName() + " уже зарегистрирован!");
         }
 
-        if (!isValidFilm(film)) {
-            log.info("Попытка зарегистрировать некорректный фильм {}", film.toString());
-            throw new ValidationException("Данные фильма некорректно заполнены!");
-        } else {
-            film.setId(generateId());
-            log.info("Сохраняется фильм {}", film.toString());
-            idToFilms.put(film.getId(), film);
-            return film;
-        }
+        film.setId(generateId());
+        log.info("Сохраняется фильм {}", film.toString());
+        idToFilms.put(film.getId(), film);
+        return film;
     }
 
     @PutMapping
@@ -56,18 +50,9 @@ public class FilmController {
             throw new ValidationException("Данные фильма некорректно заполнены!");
         }
 
-        if (!isValidFilm(film)) {
-            log.info("Попытка обновить некорректный фильм {}", film.toString());
-            throw new ValidationException("Данные фильма некорректно заполнены!");
-        }
-
         log.info("Обновление данных фильма {}", film.toString());
         idToFilms.put(film.getId(), film);
         return film;
-    }
-
-    private boolean isValidFilm(Film film) {
-        return film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 28));
     }
 
     private int generateId() {

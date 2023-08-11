@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
 
 @Data
@@ -17,12 +18,15 @@ public class User {
     @NotNull
     private int id;
     @Email
+    @NotBlank
     private final String email;
     @NotBlank
     @NotNull
+    @NotBlank
     private final String login;
     private String name;
     @NotNull
+    @PastOrPresent
     private final LocalDate birthday;
 
     @JsonCreator
@@ -31,6 +35,10 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
+
+        if (name == null || name.isBlank()) {
+            this.name = login;
+        }
     }
 
     public void setName(String name) {
