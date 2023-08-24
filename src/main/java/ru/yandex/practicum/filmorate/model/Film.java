@@ -9,6 +9,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -27,6 +29,7 @@ public class Film {
     @NotNull
     @Min(1)
     private final int duration;
+    private List<Integer> likes = new ArrayList<>();
 
     @JsonCreator
     public Film(String name, String description, LocalDate releaseDate, int duration) {
