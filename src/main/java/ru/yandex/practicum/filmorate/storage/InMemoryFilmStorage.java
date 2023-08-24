@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film addFilm(Film film) {
         if (!idToFilm.containsKey(film.getId())) {
             film.setId(generateId());
+            film.setLikes(new ArrayList<>());
             idToFilm.put(film.getId(), film);
             log.info("Сохраняется фильм {}", film.toString());
             return film;
@@ -42,6 +44,9 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Попытка обновить несуществующий фильм {}", film.toString());
             throw new FilmNotFoundException("Ошибка! Фильма с таким идентификатором нет!");
         } else {
+            if (film.getLikes() == null) {
+                film.setLikes(idToFilm.get(film.getId()).getLikes());
+            }
             idToFilm.put(film.getId(), film);
             log.info("Обновление данных фильма {}", film.toString());
             return film;
@@ -50,12 +55,12 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(int id) {
-        if (!idToFilm.containsKey(id)) {
-            log.info("Попытка извлечь несуществующий фильм");
-            throw new FilmNotFoundException("Ошибка! Фильма с таким идентификатором нет!");
-        } else if (id < 1) {
+        if (id < 1) {
             log.info("Введен некорректный идентификатор!");
             throw new FilmNotFoundException("Введен некорректный идентификатор!");
+        } else if (!idToFilm.containsKey(id)) {
+            log.info("Попытка извлечь несуществующий фильм");
+            throw new FilmNotFoundException("Ошибка! Фильма с таким идентификатором нет!");
         } else {
             return idToFilm.get(id);
         }

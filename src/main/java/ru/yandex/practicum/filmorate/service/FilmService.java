@@ -30,7 +30,7 @@ public class FilmService {
         this.filmStorage = filmStorage;
     }
 
-    public void addLike(int filmId, Integer userId) {
+    public void addLike(int filmId, int userId) {
         if (!filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
             filmStorage.getFilmById(filmId).getLikes().add(userId);
         } else {
@@ -39,7 +39,9 @@ public class FilmService {
     }
 
     public void deleteLike(int filmId, Integer userId) {
-        if (filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
+        if (filmId < 1 && userId < 1) {
+            throw new ValidationException("Введен неверный идентификатор!");
+        } else if (filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
             filmStorage.getFilmById(filmId).getLikes().remove(userId);
         } else {
             throw new UserNotFoundException("Пользователя нет в списках лайкнувших.");

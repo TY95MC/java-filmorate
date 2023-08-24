@@ -26,37 +26,37 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable(value = "id", required = false) int userId,
-                                       @PathVariable(value = "otherId", required = false) int otherId) {
+    public List<User> getCommonFriends(@PathVariable("id") int userId,
+                                       @PathVariable("otherId") int otherId) {
         log.info("Получение списка общих друзей пользователей {} и {}",
                 userService.getUserById(userId).toString(), userService.getUserById(otherId).toString());
         return userService.getCommonFriends(userId, otherId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable(value = "id", required = false) int userId,
-                          @PathVariable(value = "friendId", required = false) int friendId) {
-        userService.addFriend(userId, friendId);
+    public void addFriend(@PathVariable("id") int userId,
+                          @PathVariable("friendId") int friendId) {
         log.info("Добавление в друзья пользователей {} и {}",
                 userService.getUserById(userId), userService.getUserById(friendId));
+         userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable(value = "id", required = false) int userId,
-                             @PathVariable(value = "friendId", required = false) int friendId) {
+    public void deleteFriend(@PathVariable("id") int userId,
+                             @PathVariable("friendId") int friendId) {
         log.info("Удаление из друзей пользователей {} и {}",
                 userService.getUserById(userId).toString(), userService.getUserById(friendId).toString());
         userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getUserFriends(@PathVariable(value = "id", required = false) int id) {
+    public List<User> getUserFriends(@PathVariable("id") int id) {
         log.info("Получение списка друзей пользователя {}", userService.getUserById(id).toString());
         return userService.getUserFriends(id);
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable(value = "id", required = false) int userId) {
+    public User getUserById(@PathVariable("id") int userId) {
         log.info("Получение пользователя {}", userService.getUserById(userId).toString());
         return userService.getUserById(userId);
     }

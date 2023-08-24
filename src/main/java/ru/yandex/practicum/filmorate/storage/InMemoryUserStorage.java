@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User addUser(User user) {
         if (!idToUser.containsKey(user.getId())) {
             user.setId(generateId());
+            user.setFriends(new ArrayList<>());
             idToUser.put(user.getId(), user);
             log.info("Сохраняется пользователь: {}", user.toString());
             return user;
@@ -42,6 +44,9 @@ public class InMemoryUserStorage implements UserStorage {
             log.info("Попытка обновить несуществующего пользователя {}", user.toString());
             throw new UserNotFoundException("Ошибка! Такого пользователя нет в базе данных!");
         } else {
+            if (user.getFriends() == null) {
+                user.setFriends(idToUser.get(user.getId()).getFriends());
+            }
             log.info("Обновление данных пользователя {}", user.toString());
             idToUser.put(user.getId(), user);
             return user;
@@ -50,12 +55,12 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(int id) {
-        if (!idToUser.containsKey(id)) {
-            log.info("Попытка извлечь несуществующего пользователя!");
-            throw new UserNotFoundException("Ошибка! Пользователя с таким идентификатором нет!");
-        } else if (id < 1) {
+        if (id < 1) {
             log.info("Введен некорректный идентификатор!");
             throw new UserNotFoundException("Ошибка! Введен некорректный идентификатор!");
+        } else if (!idToUser.containsKey(id)) {
+            log.info("Попытка извлечь несуществующего пользователя!");
+            throw new UserNotFoundException("Ошибка! Пользователя с таким идентификатором нет!");
         } else {
             log.info("Получение по id данных пользователя {}", idToUser.get(id).toString());
             return idToUser.get(id);

@@ -30,7 +30,7 @@ public class User {
     @NotNull
     @PastOrPresent
     private final LocalDate birthday;
-    private List<Integer> friends = new ArrayList<>();
+    private List<Integer> friends;
 
     @JsonCreator
     public User(String email, String login, String name, LocalDate birthday) {

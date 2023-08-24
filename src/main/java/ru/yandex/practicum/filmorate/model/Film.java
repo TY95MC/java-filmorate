@@ -29,7 +29,7 @@ public class Film {
     @NotNull
     @Min(1)
     private final int duration;
-    private List<Integer> likes = new ArrayList<>();
+    private List<Integer> likes;
 
     @JsonCreator
     public Film(String name, String description, LocalDate releaseDate, int duration) {
