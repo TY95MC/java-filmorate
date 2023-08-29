@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
+import javax.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
     @Autowired
-    private final InMemoryFilmStorage filmStorage;
+    private final FilmStorage filmStorage;
 
     private final Comparator<Film> comparator = new Comparator<>() {
         @Override
@@ -39,12 +41,10 @@ public class FilmService {
     }
 
     public void deleteLike(int filmId, Integer userId) {
-        if (filmId < 1 && userId < 1) {
-            throw new ValidationException("Введен неверный идентификатор!");
-        } else if (filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
+        if (filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
             filmStorage.getFilmById(filmId).getLikes().remove(userId);
         } else {
-            throw new UserNotFoundException("Пользователя нет в списках лайкнувших.");
+            throw new EntityNotFoundException("Пользователя нет в списках лайкнувших.");
         }
     }
 
@@ -59,11 +59,11 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public Film addFilm(Film film) {
+    public Film addFilm(@Valid Film film) {
         return filmStorage.addFilm(film);
     }
 
-    public Film updateFilm(Film film) {
+    public Film updateFilm(@Valid Film film) {
         return filmStorage.updateFilm(film);
     }
 

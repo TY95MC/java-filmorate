@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -24,21 +23,13 @@ public class UserService {
     }
 
     public void addFriend(int firstFriendId, int secondFriendId) {
-        if (firstFriendId > 0 && secondFriendId > 0) {
-            userStorage.getUserById(firstFriendId).getFriends().add(secondFriendId);
-            userStorage.getUserById(secondFriendId).getFriends().add(firstFriendId);
-        } else {
-            throw new UserNotFoundException("Введен неверный идентификатор!");
-        }
+        userStorage.getUserById(firstFriendId).getFriends().add(secondFriendId);
+        userStorage.getUserById(secondFriendId).getFriends().add(firstFriendId);
     }
 
     public void deleteFriend(Integer firstFriendId, Integer secondFriendId) {
-        if (firstFriendId > 0 && secondFriendId > 0) {
-            userStorage.getUserById(firstFriendId).getFriends().remove(secondFriendId);
-            userStorage.getUserById(secondFriendId).getFriends().remove(firstFriendId);
-        } else {
-            throw new UserNotFoundException("Введен неверный идентификатор!");
-        }
+        userStorage.getUserById(firstFriendId).getFriends().remove(secondFriendId);
+        userStorage.getUserById(secondFriendId).getFriends().remove(firstFriendId);
     }
 
     public List<User> getUserFriends(int id) {

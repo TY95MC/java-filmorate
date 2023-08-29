@@ -3,12 +3,12 @@ package ru.yandex.practicum.filmorate.storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -28,12 +28,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film addFilm(Film film) {
         if (!idToFilm.containsKey(film.getId())) {
             film.setId(generateId());
-            film.setLikes(new ArrayList<>());
+            film.setLikes(new HashSet<>());
             idToFilm.put(film.getId(), film);
-            log.info("Сохраняется фильм {}", film.toString());
+            log.info("Сохраняется фильм {}.", film.toString());
             return film;
         } else {
-            log.info("Попытка зарегистрировать уже существующий фильм {}", film.toString());
+            log.info("Попытка зарегистрировать уже существующий фильм {}.", film.getId());
             throw new ValidationException("Ошибка! Такой фильм уже существует!");
         }
     }
@@ -41,26 +41,23 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         if (!idToFilm.containsKey(film.getId())) {
-            log.info("Попытка обновить несуществующий фильм {}", film.toString());
-            throw new FilmNotFoundException("Ошибка! Фильма с таким идентификатором нет!");
+            log.info("Попытка обновить несуществующий фильм {}.", film.toString());
+            throw new EntityNotFoundException("Ошибка! Фильма с таким идентификатором нет!");
         } else {
             if (film.getLikes() == null) {
                 film.setLikes(idToFilm.get(film.getId()).getLikes());
             }
             idToFilm.put(film.getId(), film);
-            log.info("Обновление данных фильма {}", film.toString());
+            log.info("Обновление данных фильма {}.", film.toString());
             return film;
         }
     }
 
     @Override
     public Film getFilmById(int id) {
-        if (id < 1) {
-            log.info("Введен некорректный идентификатор!");
-            throw new FilmNotFoundException("Введен некорректный идентификатор!");
-        } else if (!idToFilm.containsKey(id)) {
-            log.info("Попытка извлечь несуществующий фильм");
-            throw new FilmNotFoundException("Ошибка! Фильма с таким идентификатором нет!");
+        if (!idToFilm.containsKey(id)) {
+            log.info("Попытка извлечь несуществующий фильм {}.", id);
+            throw new EntityNotFoundException("Ошибка! Фильма с таким идентификатором нет!");
         } else {
             return idToFilm.get(id);
         }
