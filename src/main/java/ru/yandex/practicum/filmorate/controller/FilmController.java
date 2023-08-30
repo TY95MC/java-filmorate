@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,12 +23,11 @@ import java.util.List;
 @Validated
 @RequestMapping("/films")
 public class FilmController {
-    @Autowired
     private final FilmService filmService;
 
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
-    public FilmController(FilmService filmService) {
+    public FilmController(final FilmService filmService) {
         this.filmService = filmService;
     }
 

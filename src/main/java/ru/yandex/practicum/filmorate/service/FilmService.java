@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
-    @Autowired
     private final FilmStorage filmStorage;
 
     private final Comparator<Film> comparator = new Comparator<>() {
@@ -28,7 +26,7 @@ public class FilmService {
         }
     };
 
-    public FilmService(InMemoryFilmStorage filmStorage) {
+    public FilmService(final InMemoryFilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 

@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,12 +22,11 @@ import java.util.List;
 @RequestMapping("/users")
 @Validated
 public class UserController {
-    @Autowired
     private final UserService userService;
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
-    public UserController(UserService userService) {
+    public UserController(final UserService userService) {
         this.userService = userService;
     }
 

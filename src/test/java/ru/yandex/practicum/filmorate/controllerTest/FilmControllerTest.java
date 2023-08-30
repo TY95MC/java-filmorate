@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controllerTest;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -39,7 +38,7 @@ public class FilmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": \"1\",\"name\": \"FilmNameUpdate\", \"description\": \"Film description\"," +
                                 " \"releaseDate\": \"1967-03-25\", \"duration\": 100}"))
-                .andExpect(status().isOk());/* */
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/films"))
                 .andExpect(content().string("[{\"name\":\"FilmNameUpdate\",\"description\":\"Film description\"," +
@@ -49,15 +48,14 @@ public class FilmControllerTest {
     @Test
     void shouldAddFilmAndUpdateFilmUnsuccessfully() throws Exception {
         //фильм с пустым названием
-        Assertions.assertThatThrownBy(
-                () -> mockMvc.perform(post("/films")
+        mockMvc.perform(post("/films/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"\", \"description\": \"Film description\"," +
-                                " \"releaseDate\": \"1967-03-25\", \"duration\": 100}"))).hasNoCause();
+                                " \"releaseDate\": \"1967-03-25\", \"duration\": 100}"))
+                .andExpect(status().is5xxServerError());
 
         //фильм со слишком длинным описанием
-        Assertions.assertThatThrownBy(
-                () -> mockMvc.perform(post("/films")
+        mockMvc.perform(post("/films/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"FilmName\", \"description\": \"Film descriptionFilm descriptionFilm " +
                                 "descriptionFilm descriptionFilm descriptionFilm descriptionFilm descriptionFilm " +
@@ -65,21 +63,22 @@ public class FilmControllerTest {
                                 "descriptionFilm descriptionFilm descriptionFilm descriptionFilm descriptionFilm " +
                                 "descriptionFilm descriptionFilm description Film descriptionFilm descriptionFilm " +
                                 "descriptionFilm descriptionFilm descriptionFilm descriptionFilm description\"," +
-                                " \"releaseDate\": \"1967-03-25\", \"duration\": 100}"))).hasNoCause();
+                                " \"releaseDate\": \"1967-03-25\", \"duration\": 100}"))
+                .andExpect(status().is5xxServerError());
 
         //обновление несуществующего фильма
-        Assertions.assertThatThrownBy(
-                () -> mockMvc.perform(put("/films")
+        mockMvc.perform(put("/films/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": \"2\",\"name\": \"FilmNameUpdate\", \"description\": \"Film description\"," +
-                                " \"releaseDate\": \"1967-03-25\", \"duration\": 100}"))).hasNoCause();
+                                " \"releaseDate\": \"1967-03-25\", \"duration\": 100}"))
+                .andExpect(status().is4xxClientError());
 
         //фильм с неправильной датой выпуска
-        Assertions.assertThatThrownBy(
-                () -> mockMvc.perform(put("/films")
+        mockMvc.perform(put("/films/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"FilmName\", \"description\": \"Film description\"," +
-                                " \"releaseDate\": \"1890-03-25\", \"duration\": 100}"))).hasNoCause();
+                                " \"releaseDate\": \"1890-03-25\", \"duration\": 100}"))
+                .andExpect(status().is5xxServerError());
     }
 
 }

@@ -1,13 +1,14 @@
 package ru.yandex.practicum.filmorate.controllerTest;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -49,18 +50,26 @@ public class UserControllerTest {
     @Test
     void shouldAddUserAndUpdateUserUnsuccessfully() throws Exception {
         //пользователь с неправильным email
-        Assertions.assertThatThrownBy(
-                () -> mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"login\": \"dolore\",\"email\": \"mailmail.ru\"," +
-                                " \"birthday\": \"1946-08-20\"}"))).hasNoCause();
+        mockMvc.perform(post("/users/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"login\": \"dolore\",\"email\": \"mailmail.ru\"," +
+                        " \"birthday\": \"1946-08-20\"}")).andExpect(status().is5xxServerError());
+
 
         //обновление несуществующего пользователя
-        Assertions.assertThatThrownBy(
-                () -> mockMvc.perform(put("/users")
+        mockMvc.perform(put("/users/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"login\": \"doloreUpdate\",\"name\": \"est adipisicing\",\"id\": 3," +
-                                "\"email\": \"mail@yandex.ru\",\"birthday\": \"1976-09-20\"}"))).hasNoCause();
+                                "\"email\": \"mail@yandex.ru\",\"birthday\": \"1976-09-20\"}"))
+                .andExpect(status().is4xxClientError())
+                .andExpect(result -> assertEquals("Ошибка! Такого пользователя не существует!",
+                        result.getResolvedException().getMessage()));
 
+        //пользователь с неправильным email
+        mockMvc.perform(MockMvcRequestBuilders.post("/users/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"login\": \"dolore\",\"email\": \"mailmail.ru\"," +
+                        " \"birthday\": \"1946-08-20\"}")).andExpect(status().is5xxServerError());
     }
+
 }

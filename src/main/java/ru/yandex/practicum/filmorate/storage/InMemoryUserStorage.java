@@ -42,7 +42,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) {
         if (!idToUser.containsKey(user.getId())) {
             log.info("Попытка обновить несуществующего пользователя {}.", user.toString());
-            throw new EntityNotFoundException("Ошибка! Такой пользователя не существует!");
+            throw new EntityNotFoundException("Ошибка! Такого пользователя не существует!");
         } else {
             if (user.getFriends() == null) {
                 user.setFriends(idToUser.get(user.getId()).getFriends());

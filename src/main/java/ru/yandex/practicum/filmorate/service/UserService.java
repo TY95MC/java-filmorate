@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
@@ -11,10 +10,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    @Autowired
     private final UserStorage userStorage;
 
-    public UserService(InMemoryUserStorage userStorage) {
+    public UserService(final InMemoryUserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
