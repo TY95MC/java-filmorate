@@ -5,9 +5,7 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
-import javax.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +24,7 @@ public class FilmService {
         }
     };
 
-    public FilmService(final InMemoryFilmStorage filmStorage) {
+    public FilmService(final FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
@@ -57,11 +55,11 @@ public class FilmService {
         return filmStorage.getFilms();
     }
 
-    public Film addFilm(@Valid Film film) {
+    public Film addFilm(Film film) {
         return filmStorage.addFilm(film);
     }
 
-    public Film updateFilm(@Valid Film film) {
+    public Film updateFilm(Film film) {
         return filmStorage.updateFilm(film);
     }
 
