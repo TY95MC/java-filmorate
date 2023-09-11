@@ -39,7 +39,7 @@ WHERE film_id = 1;
 Получение id и логинов подтвержденных друзей пользователя c id = 1
 
 SELECT u.user_id,\
-u.login\
+&emsp;&emsp;&emsp;&emsp;u.login\
 FROM users AS u\
 WHERE u.user_id IN\
 &emsp;&emsp;(SELECT f.friend_id\
