@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Null;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
 import java.util.Set;
@@ -25,7 +24,6 @@ public class User {
     private String name;
     @PastOrPresent
     private final LocalDate birthday;
-    @Null
     private Set<Integer> friends;
 
     @JsonCreator

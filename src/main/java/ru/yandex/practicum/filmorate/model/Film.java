@@ -23,6 +23,8 @@ public class Film {
     @Min(1)
     private final int duration;
     private Set<Integer> likes;
+    private Genre genre;
+    private Rating rating;
 
     @JsonCreator
     public Film(String name, String description, LocalDate releaseDate, int duration) {
