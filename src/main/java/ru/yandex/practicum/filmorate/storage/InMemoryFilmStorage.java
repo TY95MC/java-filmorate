@@ -7,16 +7,27 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@Component
+@Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private static final Logger log = LoggerFactory.getLogger(InMemoryFilmStorage.class);
     private final Map<Integer, Film> idToFilm = new HashMap<>();
     private int id = 1;
+    private final Comparator<Film> comparator = new Comparator<>() {
+        @Override
+        public int compare(Film f1, Film f2) {
+            if (f1.getLikes().size() == f2.getLikes().size()) {
+                return 0;
+            }
+            return (f1.getLikes().size() > f2.getLikes().size()) ? -1 : 1;
+        }
+    };
 
     @Override
     public List<Film> getFilms() {
@@ -61,6 +72,29 @@ public class InMemoryFilmStorage implements FilmStorage {
         } else {
             return idToFilm.get(id);
         }
+    }
+
+    public void addLike(int filmId, int userId) {
+        if (!idToFilm.get(filmId).getLikes().contains(userId)) {
+            idToFilm.get(filmId).getLikes().add(userId);
+        } else {
+            throw new ValidationException("Пользователь уже лайкнул этот фильм.");
+        }
+    }
+
+    public void deleteLike(int filmId, Integer userId) {
+        if (idToFilm.get(filmId).getLikes().contains(userId)) {
+            idToFilm.get(filmId).getLikes().remove(userId);
+        } else {
+            throw new EntityNotFoundException("Пользователя нет в списках лайкнувших.");
+        }
+    }
+
+    public List<Film> getPopularFilms(int limit) {
+        return this.getFilms().stream()
+                .sorted(comparator)
+                .limit(limit)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private int generateId() {

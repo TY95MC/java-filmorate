@@ -38,6 +38,7 @@ public class FilmController {
 
     @PostMapping
     public Film add(@Valid @RequestBody Film film) {
+        log.info("сработал FilmController");
         return filmService.addFilm(film);
     }
 
@@ -69,5 +70,4 @@ public class FilmController {
         log.info("Удаление лайка к фильму {} от пользователя {}.", filmId, userId);
         filmService.deleteLike(filmId, userId);
     }
-
 }

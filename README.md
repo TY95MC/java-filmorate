@@ -1,6 +1,6 @@
 # java-filmorate
 Template repository for Filmorate project.
-<image src="ER-diagram.png">
+<image src="ER-diagram.png">\
 Запустить сервис можно в IntelliJ IDEA:
 Запустите приложение
 

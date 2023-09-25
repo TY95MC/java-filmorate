@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -11,8 +12,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@Component
+@Component("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
     private static final Logger log = LoggerFactory.getLogger(InMemoryUserStorage.class);
@@ -62,6 +64,29 @@ public class InMemoryUserStorage implements UserStorage {
             log.info("Получение по id данных пользователя {}.", idToUser.get(id).toString());
             return idToUser.get(id);
         }
+    }
+
+    public void addFriend(int firstFriendId, int secondFriendId) {
+        idToUser.get(firstFriendId).getFriends().add(secondFriendId);
+        idToUser.get(secondFriendId).getFriends().add(firstFriendId);
+    }
+
+    public void deleteFriend(Integer firstFriendId, Integer secondFriendId) {
+        idToUser.get(firstFriendId).getFriends().remove(secondFriendId);
+        idToUser.get(secondFriendId).getFriends().remove(firstFriendId);
+    }
+
+    public List<User> getUserFriends(int id) {
+        return idToUser.get(id).getFriends().stream()
+                .map(this::getUserById)
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public List<User> getCommonFriends(int firstFriendId, int secondFriendId) {
+        return idToUser.get(firstFriendId).getFriends().stream()
+                .filter(this.getUserById(secondFriendId).getFriends()::contains)
+                .map(this::getUserById)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private int generateId() {

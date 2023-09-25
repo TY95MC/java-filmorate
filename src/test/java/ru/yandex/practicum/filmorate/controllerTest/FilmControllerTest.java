@@ -31,7 +31,7 @@ public class FilmControllerTest {
 
         mockMvc.perform(get("/films"))
                 .andExpect(content().string("[{\"name\":\"Film name\",\"description\":\"Film description\"," +
-                        "\"releaseDate\":\"1967-03-25\",\"duration\":100,\"id\":1,\"likes\":[]}]"));
+                        "\"releaseDate\":\"1967-03-25\",\"duration\":100,\"id\":1,\"likes\":[],\"genre\":null,\"rating\":null}]"));
 
         //Обновление фильма
         mockMvc.perform(put("/films")
@@ -42,7 +42,7 @@ public class FilmControllerTest {
 
         mockMvc.perform(get("/films"))
                 .andExpect(content().string("[{\"name\":\"FilmNameUpdate\",\"description\":\"Film description\"," +
-                        "\"releaseDate\":\"1967-03-25\",\"duration\":100,\"id\":1,\"likes\":[]}]"));
+                        "\"releaseDate\":\"1967-03-25\",\"duration\":100,\"id\":1,\"likes\":[],\"genre\":null,\"rating\":null}]"));
     }
 
     @Test
