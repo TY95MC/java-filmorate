@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 @Component("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private static final Logger log = LoggerFactory.getLogger(InMemoryFilmStorage.class);
-    private final Map<Integer, Film> idToFilm = new HashMap<>();
-    private int id = 1;
+    private final Map<Long, Film> idToFilm = new HashMap<>();
+    private long id = 1;
     private final Comparator<Film> comparator = new Comparator<>() {
         @Override
         public int compare(Film f1, Film f2) {
@@ -65,7 +65,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(int id) {
+    public Film getFilmById(Long id) {
         if (!idToFilm.containsKey(id)) {
             log.info("Попытка извлечь несуществующий фильм {}.", id);
             throw new EntityNotFoundException("Ошибка! Фильма с таким идентификатором нет!");
@@ -74,30 +74,34 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
-    public void addLike(int filmId, int userId) {
+    public Film addLike(Long filmId, Long userId) {
         if (!idToFilm.get(filmId).getLikes().contains(userId)) {
-            idToFilm.get(filmId).getLikes().add(userId);
+            Film film = idToFilm.get(filmId);
+            film.getLikes().add(userId);
+            return film;
         } else {
             throw new ValidationException("Пользователь уже лайкнул этот фильм.");
         }
     }
 
-    public void deleteLike(int filmId, Integer userId) {
+    public Film deleteLike(Long filmId, Long userId) {
         if (idToFilm.get(filmId).getLikes().contains(userId)) {
-            idToFilm.get(filmId).getLikes().remove(userId);
+            Film film = idToFilm.get(filmId);
+            film.getLikes().remove(userId);
+            return film;
         } else {
             throw new EntityNotFoundException("Пользователя нет в списках лайкнувших.");
         }
     }
 
-    public List<Film> getPopularFilms(int limit) {
+    public List<Film> getPopularFilms(Long limit) {
         return this.getFilms().stream()
                 .sorted(comparator)
                 .limit(limit)
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    private int generateId() {
+    private long generateId() {
         return id++;
     }
 }

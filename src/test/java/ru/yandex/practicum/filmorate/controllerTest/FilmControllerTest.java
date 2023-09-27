@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controllerTest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -15,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
 public class FilmControllerTest {
 
     @Autowired
@@ -30,8 +32,8 @@ public class FilmControllerTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/films"))
-                .andExpect(content().string("[{\"name\":\"Film name\",\"description\":\"Film description\"," +
-                        "\"releaseDate\":\"1967-03-25\",\"duration\":100,\"id\":1,\"likes\":[],\"genre\":null,\"rating\":null}]"));
+                .andExpect(content().string("[{\"id\":1,\"name\":\"Film name\",\"description\":\"Film description\"," +
+                        "\"releaseDate\":\"1967-03-25\",\"duration\":100,\"likes\":[],\"genres\":[],\"mpa\":{\"id\":0,\"name\":null}}]"));
 
         //Обновление фильма
         mockMvc.perform(put("/films")
@@ -41,8 +43,8 @@ public class FilmControllerTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/films"))
-                .andExpect(content().string("[{\"name\":\"FilmNameUpdate\",\"description\":\"Film description\"," +
-                        "\"releaseDate\":\"1967-03-25\",\"duration\":100,\"id\":1,\"likes\":[],\"genre\":null,\"rating\":null}]"));
+                .andExpect(content().string("[{\"id\":1,\"name\":\"FilmNameUpdate\",\"description\":\"Film description\"," +
+                        "\"releaseDate\":\"1967-03-25\",\"duration\":100,\"likes\":[],\"genres\":[],\"mpa\":{\"id\":0,\"name\":null}}]"));
     }
 
     @Test

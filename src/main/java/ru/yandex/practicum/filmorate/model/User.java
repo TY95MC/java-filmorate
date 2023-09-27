@@ -17,7 +17,7 @@ import java.util.Set;
 @Data
 @Builder
 public class User {
-    private int id;
+    private long id;
     @Email
     @NotBlank
     private final String email;
@@ -26,8 +26,7 @@ public class User {
     private String name;
     @PastOrPresent
     private final LocalDate birthday;
-    private Set<Integer> friends;
-    private Friendship friendship;
+    private Set<Long> friends;
 
     @JsonCreator
     public User(String email, String login, String name, LocalDate birthday) {
@@ -35,14 +34,8 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
-
         if (name == null || name.isBlank()) {
             this.name = login;
         }
     }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
 }

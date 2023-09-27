@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -18,8 +17,8 @@ import java.util.stream.Collectors;
 public class InMemoryUserStorage implements UserStorage {
 
     private static final Logger log = LoggerFactory.getLogger(InMemoryUserStorage.class);
-    private final Map<Integer, User> idToUser = new HashMap<>();
-    private int id = 1;
+    private final Map<Long, User> idToUser = new HashMap<>();
+    private long id = 1;
 
     public List<User> getUsers() {
         log.info("Количество пользователей в текущий момент: {}.", idToUser.size());
@@ -56,7 +55,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(int id) {
+    public User getUserById(Long id) {
         if (!idToUser.containsKey(id)) {
             log.info("Попытка получить несуществующего пользователя с идентификатором {}.", id);
             throw new EntityNotFoundException("Ошибка! Пользователя с таким идентификатором нет!");
@@ -66,30 +65,34 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    public void addFriend(int firstFriendId, int secondFriendId) {
-        idToUser.get(firstFriendId).getFriends().add(secondFriendId);
+    public User addFriend(Long firstFriendId, Long secondFriendId) {
+        User user = idToUser.get(firstFriendId);
+        user.getFriends().add(secondFriendId);
         idToUser.get(secondFriendId).getFriends().add(firstFriendId);
+        return user;
     }
 
-    public void deleteFriend(Integer firstFriendId, Integer secondFriendId) {
-        idToUser.get(firstFriendId).getFriends().remove(secondFriendId);
+    public User deleteFriend(Long firstFriendId, Long secondFriendId) {
+        User user = idToUser.get(firstFriendId);
+        user.getFriends().remove(secondFriendId);
         idToUser.get(secondFriendId).getFriends().remove(firstFriendId);
+        return user;
     }
 
-    public List<User> getUserFriends(int id) {
+    public List<User> getUserFriends(Long id) {
         return idToUser.get(id).getFriends().stream()
                 .map(this::getUserById)
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public List<User> getCommonFriends(int firstFriendId, int secondFriendId) {
+    public List<User> getCommonFriends(Long firstFriendId, Long secondFriendId) {
         return idToUser.get(firstFriendId).getFriends().stream()
                 .filter(this.getUserById(secondFriendId).getFriends()::contains)
                 .map(this::getUserById)
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    private int generateId() {
+    private long generateId() {
         return id++;
     }
 

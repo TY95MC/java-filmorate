@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.MpaRatingStorage;
 
@@ -26,8 +28,16 @@ public class MpaRatingDBStorage implements MpaRatingStorage {
 
     @Override
     public MpaRating findMpaRatingById(int id) {
-        String sql = "SELECT * FROM rating WHERE rating_id = ?";
-        return jdbcTemplate.queryForObject(sql, new MpaRatingMapper(), id);
+        return checkIfExists(id);
+    }
+
+    private MpaRating checkIfExists(int id) {
+        try {
+            String sql = "SELECT * FROM rating WHERE rating_id = ?";
+            return jdbcTemplate.queryForObject(sql, new MpaRatingMapper(), id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new EntityNotFoundException("Рейтинга с id:" + id + " не существует.");
+        }
     }
 
     static class MpaRatingMapper implements RowMapper<MpaRating> {
