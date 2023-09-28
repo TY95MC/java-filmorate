@@ -48,7 +48,7 @@ class UserDbStorageTest {
 
     @Test
     public void addUserTestUnSuccessfully() {
-        catchThrowableOfType(()->userStorage.addUser(User.builder()
+        catchThrowableOfType(() -> userStorage.addUser(User.builder()
                 .id(-1L)
                 .email("mail@yandex.ru")
                 .login("login1")
@@ -59,7 +59,7 @@ class UserDbStorageTest {
 
     @Test
     public void updateUserTestUnSuccessfully() {
-        catchThrowableOfType(()->userStorage.updateUser(User.builder()
+        catchThrowableOfType(() -> userStorage.updateUser(User.builder()
                 .id(3L)
                 .email("mail@yandex.ru")
                 .login("login1")
