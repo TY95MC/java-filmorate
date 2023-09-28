@@ -17,13 +17,11 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component("userDbStorage")
 @Primary
@@ -39,7 +37,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getUsers() {
-        return jdbcTemplate.query("SELECT * FROM users", new UserMapper());
+        return List.copyOf(jdbcTemplate.query("SELECT * FROM users", new UserMapper()));
     }
 
     @Override
@@ -56,7 +54,7 @@ public class UserDbStorage implements UserStorage {
             return stmt;
         }, id);
         user.setId(Objects.requireNonNull(id.getKey()).longValue());
-        return user;
+        return getUserById(user.getId());
     }
 
     @Override
@@ -76,7 +74,7 @@ public class UserDbStorage implements UserStorage {
                 jdbcTemplate.update(sqlFriends, user.getId(), friend);
             }
         }
-        return user;
+        return getUserById(user.getId());
     }
 
     @Override
@@ -105,48 +103,49 @@ public class UserDbStorage implements UserStorage {
 
     public List<User> getUserFriends(Long id) {
         log.info("Получение всех друзей пользователя id = {}", id);
-        User user = getUserById(id);
-        List<User> list = new ArrayList<>();
-        for (Long friend : user.getFriends()) {
-            list.add(getUserById(friend));
-        }
-        return list;
+        String sql = "SELECT * FROM USERS u \n" +
+                "WHERE u.USER_ID IN " +
+                "(" +
+                "SELECT uf2.FRIEND_ID FROM USER_FRIENDSHIP uf2 " +
+                "WHERE uf2.USER_ID = " + id +
+                ")";
+        return List.copyOf(jdbcTemplate.query(sql, new UserMapper()));
     }
 
     public List<User> getCommonFriends(Long firstFriendId, Long secondFriendId) {
         log.info("Общие друзья пользователей {} и {}", firstFriendId, secondFriendId);
-        User user1 = getUserById(firstFriendId);
-        User user2 = getUserById(secondFriendId);
-        List<Long> commonFriends = user1.getFriends().stream()
-                .filter(user2.getFriends()::contains)
-                .collect(Collectors.toUnmodifiableList());
-        List<User> list = new ArrayList<>();
-        for (Long friend : commonFriends) {
-            list.add(getUserById(friend));
-        }
-        return list;
+        String sql = "SELECT * FROM users " +
+                "WHERE user_id IN " +
+                "(" +
+                "SELECT friend_id FROM USER_FRIENDSHIP " +
+                "WHERE USER_ID = " + firstFriendId +
+                " INTERSECT " +
+                "SELECT friend_id FROM USER_FRIENDSHIP uf " +
+                "WHERE USER_ID = " + secondFriendId +
+                ")";
+        return List.copyOf(jdbcTemplate.query(sql, new UserMapper()));
     }
 
+    @SuppressWarnings("checkstyle:Regexp")
     protected boolean checkIfUserExists(Long id) {
         try {
             if (id < 1) {
                 log.info("Некорректный идентификатор id:" + id);
                 throw new EntityNotFoundException("Некорректный идентификатор id:" + id);
             }
-            Set<Long> set = createSet("SELECT user_id FROM users WHERE user_id = " + id);
-            if (set.contains(id)) {
-                return true;
-            } else {
-                log.info("Некорректный идентификатор id:" + id);
+            String sql = "SELECT COUNT(user_id) FROM users WHERE user_id = " + id;
+            if (jdbcTemplate.queryForObject(sql, Integer.class) == 0) {
+                log.info("Несуществующий идентификатор id:" + id);
                 throw new EntityNotFoundException("Пользователь с id:" + id + " не найден.");
             }
+            return true;
         } catch (EmptyResultDataAccessException e) {
             log.info("Некорректный идентификатор id:" + id);
             throw new EntityNotFoundException("Пользователя с id:" + id + " не существует.");
         }
     }
 
-    private Set<Long> createSet(String sql) {
+    private Set<Long> getIdSet(String sql) {
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
         Set<Long> set = new HashSet<>();
         for (Map<String, Object> map : list) {
@@ -167,7 +166,7 @@ public class UserDbStorage implements UserStorage {
                     .login(rs.getString("user_login"))
                     .name(rs.getString("user_name"))
                     .birthday(rs.getDate("user_birthday").toLocalDate())
-                    .friends(createSet("SELECT friend_id FROM user_friendship WHERE user_id = "
+                    .friends(getIdSet("SELECT friend_id FROM user_friendship WHERE user_id = "
                             + rs.getLong("user_id")))
                     .build();
         }

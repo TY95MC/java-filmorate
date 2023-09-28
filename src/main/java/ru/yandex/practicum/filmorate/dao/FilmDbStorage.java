@@ -18,7 +18,6 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +44,7 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT OUTER JOIN film_rating AS fr ON f.film_id = fr.film_id " +
                 "LEFT OUTER JOIN rating AS r ON fr.rating_id = r.rating_id " +
                 "ORDER BY f.film_id";
-        return jdbcTemplate.query(sql, new FilmMapper());
+        return List.copyOf(jdbcTemplate.query(sql, new FilmMapper()));
     }
 
     @Override
@@ -150,16 +149,16 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(Long limit) {
-        String sqlPopular = "SELECT f.film_id FROM FILMS f " +
-                "LEFT OUTER JOIN FILM_LIKES fl ON f.FILM_ID = fl.FILM_ID  " +
-                "GROUP BY f.FILM_ID " +
-                "ORDER BY COUNT(fl.USER_ID) DESC " +
-                "LIMIT " + limit;
-        List<Film> list = new ArrayList<>();
-        for (Long i : createSet(sqlPopular)) {
-            list.add(getFilmById(i));
-        }
-        return list;
+        String sqlPopular = "SELECT * FROM films AS f " +
+                "LEFT OUTER JOIN film_rating AS fr ON f.film_id = fr.film_id " +
+                "LEFT OUTER JOIN rating AS r ON fr.rating_id = r.rating_id " +
+                "WHERE f.film_id IN  " +
+                "(SELECT f1.film_id FROM FILMS f1 " +
+                "LEFT OUTER JOIN FILM_LIKES fl1 ON f1.FILM_ID = fl1.FILM_ID " +
+                "GROUP BY f1.FILM_ID " +
+                "ORDER BY COUNT(fl1.USER_ID) DESC " +
+                "LIMIT " + limit + ")";
+        return List.copyOf(jdbcTemplate.query(sqlPopular, new FilmMapper()));
     }
 
     private boolean checkIfFilmExists(Long id) {
@@ -168,20 +167,19 @@ public class FilmDbStorage implements FilmStorage {
                 log.info("Некорректный идентификатор id:" + id);
                 throw new EntityNotFoundException("Некорректный идентификатор id:" + id);
             }
-            Set<Long> set = createSet("SELECT film_id FROM films WHERE film_id = " + id);
-            if (!set.isEmpty()) {
-                return true;
-            } else {
-                log.info("Некорректный идентификатор id:" + id);
+            String sql = "SELECT COUNT(film_id) FROM films WHERE film_id = " + id;
+            if (jdbcTemplate.queryForObject(sql, Integer.class) == 0) {
+                log.info("Несуществующий идентификатор id:" + id);
                 throw new EntityNotFoundException("Фильм с id:" + id + " не найден.");
             }
+            return true;
         } catch (EmptyResultDataAccessException e) {
             log.info("Некорректный идентификатор id:" + id);
             throw new EntityNotFoundException("Пользователя с id:" + id + " не существует.");
         }
     }
 
-    private Set<Long> createSet(String sql) {
+    private Set<Long> getIdSet(String sql) {
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
         Set<Long> set = new HashSet<>();
         for (Map<String, Object> map : list) {
@@ -197,7 +195,7 @@ public class FilmDbStorage implements FilmStorage {
 
         @Override
         public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Set<Long> genresId = createSet("SELECT genre_id FROM film_genre WHERE film_id = " +
+            Set<Long> genresId = getIdSet("SELECT genre_id FROM film_genre WHERE film_id = " +
                     rs.getLong("film_id"));
             Set<Genre> genreSet = new HashSet<>();
             for (Long id : genresId) {
@@ -212,7 +210,7 @@ public class FilmDbStorage implements FilmStorage {
                     .description(rs.getString("film_description"))
                     .releaseDate(rs.getDate("film_release_date").toLocalDate())
                     .duration(rs.getInt("film_duration"))
-                    .likes(createSet("SELECT user_id FROM film_likes WHERE film_id = " +
+                    .likes(getIdSet("SELECT user_id FROM film_likes WHERE film_id = " +
                             rs.getInt("film_id")))
                     .genres(genreSet)
                     .mpa(new MpaRating(rs.getInt("rating_id"), rs.getString("rating_name")))
