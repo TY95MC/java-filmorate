@@ -102,22 +102,23 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<User> getUserFriends(Long id) {
+        checkIfUserExists(id);
         log.info("Получение всех друзей пользователя id = {}", id);
         String sql = "SELECT * FROM users AS u " +
-                "LEFT OUTER JOIN USER_FRIENDSHIP AS uf ON uf.FRIEND_ID = u.USER_ID " +
-                "WHERE uf.USER_ID = " + id;
+                "LEFT OUTER JOIN user_friendship AS uf ON uf.friend_id = u.user_id " +
+                "WHERE uf.user_id = " + id;
         return List.copyOf(jdbcTemplate.query(sql, new UserMapper()));
     }
 
     public List<User> getCommonFriends(Long firstFriendId, Long secondFriendId) {
+        checkIfUserExists(firstFriendId);
+        checkIfUserExists(secondFriendId);
         log.info("Общие друзья пользователей {} и {}", firstFriendId, secondFriendId);
-        String sql = "SELECT u.USER_ID, u.USER_EMAIL, u.USER_LOGIN, u.USER_NAME, u.USER_BIRTHDAY FROM users AS u " +
-                "LEFT OUTER JOIN USER_FRIENDSHIP AS uf ON uf.FRIEND_ID = u.USER_ID " +
-                "WHERE uf.USER_ID =  " + firstFriendId +
-                " INTERSECT " +
-                "SELECT u1.USER_ID, u1.USER_EMAIL, u1.USER_LOGIN, u1.USER_NAME, u1.USER_BIRTHDAY FROM users AS u1 " +
-                "LEFT OUTER JOIN USER_FRIENDSHIP as uf1 ON uf1.FRIEND_ID = u1.USER_ID " +
-                "WHERE uf1.USER_ID = " + secondFriendId;
+        String sql = "SELECT u.user_id, u.user_email, u.user_login, u.user_name, u.user_birthday " +
+                "FROM user_friendship AS uf " +
+                "LEFT OUTER JOIN user_friendship AS uf2 ON uf.friend_id = uf2.friend_id AND uf2.user_id = " + firstFriendId +
+                " LEFT OUTER JOIN users AS u ON uf2.friend_id = u.user_id " +
+                "WHERE uf.user_id = " + secondFriendId;
         return List.copyOf(jdbcTemplate.query(sql, new UserMapper()));
     }
 
