@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controllerTest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
 public class UserControllerTest {
 
     @Autowired
@@ -62,7 +64,7 @@ public class UserControllerTest {
                         .content("{\"login\": \"doloreUpdate\",\"name\": \"est adipisicing\",\"id\": 3," +
                                 "\"email\": \"mail@yandex.ru\",\"birthday\": \"1976-09-20\"}"))
                 .andExpect(status().is4xxClientError())
-                .andExpect(result -> assertEquals("Ошибка! Такого пользователя не существует!",
+                .andExpect(result -> assertEquals("Пользователь с id:3 не найден.",
                         result.getResolvedException().getMessage()));
 
         //пользователь с неправильным email
