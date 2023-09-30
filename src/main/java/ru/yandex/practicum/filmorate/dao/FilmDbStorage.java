@@ -149,15 +149,15 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(Long limit) {
-        String sqlPopular = "SELECT * FROM films AS f " +
-                "LEFT OUTER JOIN film_rating AS fr ON f.film_id = fr.film_id " +
-                "LEFT OUTER JOIN rating AS r ON fr.rating_id = r.rating_id " +
-                "WHERE f.film_id IN  " +
-                "(SELECT f1.film_id FROM FILMS f1 " +
-                "LEFT OUTER JOIN FILM_LIKES fl1 ON f1.FILM_ID = fl1.FILM_ID " +
-                "GROUP BY f1.FILM_ID " +
-                "ORDER BY COUNT(fl1.USER_ID) DESC " +
-                "LIMIT " + limit + ")";
+        String sqlPopular = "SELECT f.FILM_ID, f.FILM_NAME, f.FILM_DESCRIPTION, f.FILM_RELEASE_DATE, " +
+                "f.FILM_DURATION, fr.RATING_ID, r.RATING_NAME " +
+                "FROM FILMS AS f " +
+                "LEFT OUTER JOIN FILM_LIKES AS fl ON f.FILM_ID = fl.FILM_ID " +
+                "LEFT OUTER JOIN FILM_RATING AS fr ON f.FILM_ID = fr.FILM_ID " +
+                "LEFT OUTER JOIN RATING AS r ON fr.RATING_ID = r.RATING_ID " +
+                "GROUP BY f.FILM_ID " +
+                "ORDER BY COUNT(fl.USER_id) DESC " +
+                "LIMIT " + limit;
         return List.copyOf(jdbcTemplate.query(sqlPopular, new FilmMapper()));
     }
 
