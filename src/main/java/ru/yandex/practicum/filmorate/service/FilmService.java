@@ -1,54 +1,31 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
+    @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
-
-    private final Comparator<Film> comparator = new Comparator<>() {
-        @Override
-        public int compare(Film f1, Film f2) {
-            if (f1.getLikes().size() == f2.getLikes().size()) {
-                return 0;
-            }
-            return (f1.getLikes().size() > f2.getLikes().size()) ? -1 : 1;
-        }
-    };
 
     public FilmService(final FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
-    public void addLike(int filmId, int userId) {
-        if (!filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
-            filmStorage.getFilmById(filmId).getLikes().add(userId);
-        } else {
-            throw new ValidationException("Пользователь уже лайкнул этот фильм.");
-        }
+    public void addLike(Long filmId, Long userId) {
+        filmStorage.addLike(filmId, userId);
     }
 
-    public void deleteLike(int filmId, Integer userId) {
-        if (filmStorage.getFilmById(filmId).getLikes().contains(userId)) {
-            filmStorage.getFilmById(filmId).getLikes().remove(userId);
-        } else {
-            throw new EntityNotFoundException("Пользователя нет в списках лайкнувших.");
-        }
+    public void deleteLike(Long filmId, Long userId) {
+        filmStorage.deleteLike(filmId, userId);
     }
 
-    public List<Film> getPopularFilms(int limit) {
-        return filmStorage.getFilms().stream()
-                .sorted(comparator)
-                .limit(limit)
-                .collect(Collectors.toUnmodifiableList());
+    public List<Film> getPopularFilms(Long limit) {
+        return filmStorage.getPopularFilms(limit);
     }
 
     public List<Film> getFilms() {
@@ -63,7 +40,7 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public Film getFilmById(int id) {
+    public Film getFilmById(Long id) {
         return filmStorage.getFilmById(id);
     }
 

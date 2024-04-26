@@ -1,11 +1,6 @@
-# java-filmorate сервис по оценке фильмов
-Сервис позволяет добавлять/обновлять/удалять фильмы, ставить/убирать лайк фильму, добавлять/удалять друзей, получение общего списка друзей
-
-стек технологий: Spring-Boot, Lombok, H2database; SDK 11
-
-Схема базы данных Н2
+# java-filmorate
+Template repository for Filmorate project.
 <image src="ER-diagram.png">
-
 Запустить сервис можно в IntelliJ IDEA:
 Запустите класс FilmorateApplication в папке 
 java-filmorate\src\main\java\ru\yandex\practicum\filmorate\
